@@ -24,6 +24,7 @@
 
 import FreeCAD, FreeCADGui, inspect, Part
 from FreeCAD import Console
+from command.PCBmoveParts import moveParts
 #from FreeCAD import DraftVecUtils
 from pivy.coin import *
 from PySide import QtGui
@@ -31,6 +32,9 @@ from PySide import QtGui
 import homeDir
 from SetParameter import readSetting
 import math
+import newWire
+import time
+from threading import Timer
 
 # helper -------------------------------------------------------------------
 
@@ -50,6 +54,9 @@ def addCommand(name,cmdObject):
 # The command classes
 #---------------------------------------------------------------------------
 
+
+
+
 class LineSettings:
 	"Parameter Settings"
 	def Activated(self):
@@ -60,22 +67,27 @@ class LineSettings:
 
 	def GetResources(self):
 		return {'Pixmap': homeDir.__dir__ + '/icons/Settings.svg', 'MenuText': 'Parameter Settings', 'ToolTip': 'Set the parameter for surface circuits'}
+	      
+FreeCADGui.addCommand('LineSettings',LineSettings())
 
-#class addWire:
-	#"make a wire"
-	#def Activated(self):
-#		import newWire
-#		reload(newWire)
-		#panel = SlicerPanel.SlicerPanel()
-		#FreeCADGui.Control.showDialog(panel)
+#----------------------------------------------------------------------------------------
+
+class cmdPartMoveModel:
+    def Activated(self):
+        panel = moveParts(FreeCADGui.Selection.getSelection()[0].Package)
+        FreeCADGui.Control.showDialog(panel)
+        
+    def GetResources(self):
+        return {'MenuText': 'Placement model', 'ToolTip': 'Placement model'}
+
+FreeCADGui.addCommand('cmdPartMoveModel', cmdPartMoveModel())
 
 
-#	def GetResources(self):
-#		return {'Pixmap': homeDir.__dir__ + '/icons/makeWire.svg', 'MenuText': 'add a wire', 'ToolTip': 'add a wire'}
+#----------------------------------------------------------------------------------------
 
 
-class makeWire:
-
+class makeWire:  
+  
   def __init__(self ):
     self.view = FreeCADGui.ActiveDocument.ActiveView
     self.callback = self.view.addEventCallbackPivy(SoMouseButtonEvent.getClassTypeId(),self.execute)
@@ -160,22 +172,21 @@ class makeWire:
         shell = shellleftUp.fuse(shellleftDown.fuse(shellrightDown.fuse(shellrightUp)))
 
         # create sphere at the node
-        sphere1 = Part.makeSphere(self.thickness*0.5, self.nodesM[0])
         sphere = Part.makeSphere(self.thickness*0.5, self.nodesM[-1])
         
-      try:
-	if len(self.nodesM) == 2:
-	  sphere1 = Part.makeSphere(self.thickness*0.5, self.nodesM[0])
-	  time.sleep(0.2)
-	  shell = shell.fuse(sphere1)
-	  time.sleep(0.2)
-	  self.shellComplete = shell.fuse(sphere)
-	elif len(self.nodesM) > 2:
-	  time.sleep(0.2)
-	  self.shellComplete = self.shellComplete.fuse(shell)
-	  time.sleep(0.2)
-	  self.shellComplete = self.shellComplete.fuse(sphere)
-	  
+        try:
+          if len(self.nodesM) == 2:
+	    sphere1 = Part.makeSphere(self.thickness*0.5, self.nodesM[0])
+	    time.sleep(0.2)
+	    shell = shell.fuse(sphere1)
+	    time.sleep(0.2)
+	    self.shellComplete = shell.fuse(sphere)
+          elif len(self.nodesM) > 2:
+	    time.sleep(0.2)
+	    self.shellComplete = self.shellComplete.fuse(shell)
+	    time.sleep(0.2)
+            self.shellComplete = self.shellComplete.fuse(sphere)
+            
           self.vol = Part.makeSolid(self.shellComplete)
           self.error = False
 	except:
@@ -227,9 +238,4 @@ class makeWire:
         vec = None
     return vec
 
-#---------------------------------------------------------------------------
-# Adds the commands to the FreeCAD command manager
-#---------------------------------------------------------------------------
-
-FreeCADGui.addCommand('LineSettings',LineSettings())
 FreeCADGui.addCommand('makeWire',makeWire())
