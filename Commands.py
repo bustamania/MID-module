@@ -33,8 +33,7 @@ import homeDir
 from SetParameter import readSetting
 import math
 import newWire
-import time
-from threading import Timer
+
 
 # helper -------------------------------------------------------------------
 
