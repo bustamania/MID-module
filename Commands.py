@@ -31,7 +31,6 @@ from PySide import QtGui
 import homeDir
 from SetParameter import readSetting
 import math
-import ViewProvider
 
 # helper -------------------------------------------------------------------
 
@@ -164,13 +163,19 @@ class makeWire:
         sphere1 = Part.makeSphere(self.thickness*0.5, self.nodesM[0])
         sphere = Part.makeSphere(self.thickness*0.5, self.nodesM[-1])
         
-        try:
-          if len(self.nodesM) == 2:
-	    sphere = sphere.fuse(sphere1)
-            self.shellComplete = shell.fuse(sphere)
-          elif len(self.nodesM) > 2:
-	    shell = shell.fuse(sphere)
-            self.shellComplete = self.shellComplete.fuse(shell)
+      try:
+	if len(self.nodesM) == 2:
+	  sphere1 = Part.makeSphere(self.thickness*0.5, self.nodesM[0])
+	  time.sleep(0.2)
+	  shell = shell.fuse(sphere1)
+	  time.sleep(0.2)
+	  self.shellComplete = shell.fuse(sphere)
+	elif len(self.nodesM) > 2:
+	  time.sleep(0.2)
+	  self.shellComplete = self.shellComplete.fuse(shell)
+	  time.sleep(0.2)
+	  self.shellComplete = self.shellComplete.fuse(sphere)
+	  
           self.vol = Part.makeSolid(self.shellComplete)
           self.error = False
 	except:
