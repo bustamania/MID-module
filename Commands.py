@@ -177,21 +177,18 @@ class makeWire:
         try:
           if len(self.nodesM) == 2:
 	    sphere1 = Part.makeSphere(self.thickness*0.5, self.nodesM[0])
-	    time.sleep(0.2)
-	    shell = shell.fuse(sphere1)
-	    time.sleep(0.2)
-	    self.shellComplete = shell.fuse(sphere)
+	    #shell = shell.fuse(sphere1)
+	    self.shellComplete = shell#.fuse(sphere)
           elif len(self.nodesM) > 2:
-	    time.sleep(0.2)
 	    self.shellComplete = self.shellComplete.fuse(shell)
-	    time.sleep(0.2)
-            self.shellComplete = self.shellComplete.fuse(sphere)
+           #self.shellComplete = self.shellComplete.fuse(sphere)
             
           self.vol = Part.makeSolid(self.shellComplete)
           self.error = False
 	except:
           if self.error == False:
             self.nodesM = self.nodesM[:-1]
+            self.nodesN = self.nodesN[:-1]
           self.error = True
           print("Fusion error!")
 
